@@ -49,6 +49,7 @@ import java.util.*;
 import java.io.*;
 import java.applet.*;
 import java.net.*;
+import java.sql.SQLException;
 
 /**
  * List Demo. This demo shows that it is not
@@ -62,59 +63,114 @@ import java.net.*;
  * @author Jeff Dinkins
  */
 public class ListDemo extends DemoModule {
-    JList list;
 
-    JPanel prefixList;
+	public ListDemo(SwingSet2 swingset) {
+		
+		super(swingset, "ListDemo", "toolbar/JList.gif");
 
-    JPanel suffixList;
-
-    Action prefixAction;
-    Action suffixAction;
-
-    //GeneratedListModel listModel;
-
-    Vector checkboxes = new Vector();
-
-
-    /**
-     * ListDemo Constructor
-     */
-    public ListDemo(SwingSet2 swingset) {
-    	
-    	
-        super(swingset, "ListDemo", "toolbar/JList.gif");
-
-        //loadImages();
-        
         setLayout(new BorderLayout());
+     
+       DefaultListModel listAllBook;
+       
+       JLabel description = new JLabel(getString("ListDemo.description"));
+       getDemoPanel().add(description, BorderLayout.NORTH);
 
-        JLabel description = new JLabel(getString("ListDemo.description"));
-        getDemoPanel().add(description, BorderLayout.NORTH);
+       JButton addBook = new JButton("Добавить");
+       getDemoPanel().add(addBook, BorderLayout.WEST);
 
-        JButton addBook = new JButton("Добавить");
-        getDemoPanel().add(addBook, BorderLayout.WEST);
+       JButton renBook = new JButton("Изменить");
+       getDemoPanel().add(renBook, BorderLayout.CENTER);
+       
+       JButton delBook = new JButton("Удалить");
+       getDemoPanel().add(delBook, BorderLayout.EAST);
+              
+       listAllBook = new DefaultListModel();
+       
+       listAllBook.add(0, "Первый элемент");
+       
+       /*
+       final JCheckBox cb = (JCheckBox) listAllBook.add(0, new JCheckBox(listAllBook));
+       checkboxes.addElement(cb);
+       cb.setSelected(selected);
+       cb.addActionListener(prefixAction);
+       if(selected) {
+           listModel.addPrefix(prefix);
+       }
+       cb.addFocusListener(listFocusListener);       
+   		*/
+       
+       ArrayList<BookDescription> allBook =  AllBookDescription.getAllBookDescription();
+	
+       for(BookDescription str: allBook) {
+  		
+   			listAllBook.add(0, str.IDBook);
+   		}
+       
+   		JList listAllBookDescription = new JList(listAllBook);
+   		getDemoPanel().add(listAllBookDescription, BorderLayout.SOUTH);
+   		
+   		addBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addBook(evt);
+            }
 
-        JButton renBook = new JButton("Изменить");
-        getDemoPanel().add(renBook, BorderLayout.CENTER);
+			private void addBook(ActionEvent evt) {
+				
+				JFileChooser dialog = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("SQLite", "SQLite3");
+				String descriptionBook = "";
+				
+				dialog.setFileFilter(filter);
+				int ret = dialog.showDialog(null, "Открыть файл");  
+                if (ret == JFileChooser.APPROVE_OPTION) {
+                    File file = dialog.getSelectedFile();
+                    System.out.println("Выбранный файл: " + file.getName());
+                    
+                    // Проверка на совпадение
+                    if(AllBookDescription.compBook(file.getName())) {
+                    	AllBookDescription.addBook("1", file.getName(), "");
+                    	listAllBook.add(0, file.getName());
+                    	
+                    	// Отрыть выбранную базу для чтения полного названия
+                        /*
+                    	DBase discretionaryBook = new DBase("db//" + file.getName(), "Произвольная книга");
+                        try {
+                        	discretionaryBook.ConnDBase();
+                        	//descriptionBook = discretionaryBook.ReadDescription();  
+                        	discretionaryBook.CloseDB();
+                		} catch (ClassNotFoundException e) {
+                			e.printStackTrace();
+                		} catch (SQLException e) {
+                			e.printStackTrace();
+                		}
+                    	*/
+                    	
+                    	
+                    	
+                        // Общий список книг
+                    	/*
+                        DBase FullBooksList = new DBase("db//FullBooksList.SQLite3", "Общий список книг");
+                        try {
+                        	FullBooksList.ConnDBase();
+                        	// FullBooksList.SaveInfo(file.getName(), discretionaryBook);  
+                        	FullBooksList.CloseDB();
+                		} catch (ClassNotFoundException e) {
+                			e.printStackTrace();
+                		} catch (SQLException e) {
+                			e.printStackTrace();
+                		}
+                    	*/
+
+                    }
+                    else {
+                    	
+                    JOptionPane.showMessageDialog(null, "Данный объект присутствует в списке", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    
+                    }
+                }
+				
+			}
+        });        
         
-        JButton delBook = new JButton("Удалить");
-        getDemoPanel().add(delBook, BorderLayout.EAST);
-
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.X_AXIS));
-        centerPanel.add(Box.createRigidArea(HGAP10));
-
-        
-        getDemoPanel().add(centerPanel, BorderLayout.SOUTH);
- 
-        
-        
-    }
-    
-    
-    
-    
-    
-    
-    
+	}
 }

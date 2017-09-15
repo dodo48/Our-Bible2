@@ -13,6 +13,13 @@ public class BookDescription {
         this.Description = Description;
    }
 
+	public BookDescription() {
+        ID = "";
+        IDBook = "";
+        Description = "";
+   }
+	
+	
    public String getID() {
         return ID;
    }

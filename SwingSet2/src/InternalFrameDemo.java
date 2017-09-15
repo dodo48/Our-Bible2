@@ -131,9 +131,22 @@ public class InternalFrameDemo extends DemoModule {
         createInternalFrame(icon2, DEMO_FRAME_LAYER, FRAME_WIDTH, FRAME_HEIGHT);
         createMyInternalFrame(icon2, DEMO_FRAME_LAYER, FRAME_WIDTH, FRAME_HEIGHT);
         
-        DBase FullBooksList = new DBase("db//FullBooksList.SQLite3", "Общий список книг");
         // Общий список книг
-        AllBookDescription abd = new AllBookDescription();
+        DBase FullBooksList = new DBase("db//FullBooksList.SQLite3", "Общий список книг");
+        try {
+        	FullBooksList.ConnDBase();
+        	FullBooksList.ReadFullBooksList(); 
+        	AllBookDescription.showAllBook();
+        	FullBooksList.CloseDB();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        
+        
+        
+
        
     }
 

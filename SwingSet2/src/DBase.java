@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 
 public class DBase {
@@ -49,6 +50,78 @@ public class DBase {
 
 		return result;
     }
+
+
+	public String ReadDescription() throws ClassNotFoundException, SQLException {
+		statmt = conn.createStatement();
+		resSet = statmt.executeQuery("SELECT description FROM INFO;");
+
+		String result = "<body> <H1>" + description + "</H1>";
+
+		while (resSet.next()) {
+
+			String description = resSet.getString("description");
+			result = result + "<P>" + description + "</P>";
+
+			System.out.println("название: " + result);
+		}
+
+		return result;
+    }
+	
+	
+	
+	// -------- Вывод таблицы--------
+	public void SaveInfo(String IDBook, String Description) throws ClassNotFoundException, SQLException {
+		
+		String insertBook = "INSERT INTO BookDescription VALUES (?, ?)";
+		PreparedStatement preparedStatement = null;
+		preparedStatement.setInt(1, 1);
+		preparedStatement.setString(2, IDBook);
+		preparedStatement.setString(3, Description);
+
+		preparedStatement = conn.prepareStatement(insertBook);
+		preparedStatement.execute();
+
+    }
+	
+	
+	
+	
+	
+	// -------- Вывод таблицы FullBooksList --------
+	public void ReadFullBooksList() throws ClassNotFoundException, SQLException {
+
+		try {
+			statmt = conn.createStatement();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		resSet = statmt.executeQuery("SELECT * FROM BookDescription;");
+
+		BookDescription bd = new BookDescription();
+
+		System.out.println("Перед циклом чтеня таблицы BookDescription");
+		
+			while (resSet.next()) {
+
+				System.out.println("Читаю таблицу BookDescription");
+				
+				bd.ID = String.valueOf(resSet.getInt("ID"));
+				bd.IDBook = resSet.getString("IDBook");
+				bd.Description = resSet.getString("Description");
+				AllBookDescription.addBook(bd.ID, bd.IDBook, bd.Description);
+				//SaveInfo(bd.IDBook, bd.Description);
+			}
+			System.out.println("Таблица выведена");
+
+
+    }
+	
+	
+	
 	
 	// получить текст главы
 	public String GetChapterText(int bookNumber, int chapter) throws ClassNotFoundException, SQLException {

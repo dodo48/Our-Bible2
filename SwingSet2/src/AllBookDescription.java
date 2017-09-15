@@ -5,10 +5,36 @@ public class AllBookDescription {
     static ArrayList<BookDescription> arraylist = new ArrayList<BookDescription>();
     
     public static void addBook(String ID, String IDBook, String Description) {
-    	arraylist.add(new BookDescription(ID, IDBook, Description));	
+    	
+		System.out.println("Добавляю");
+		arraylist.add(new BookDescription(ID, IDBook, Description));
+    	
+    	for(BookDescription str: arraylist) {
+    		
+			System.out.println("Иду по");
+       		System.out.println(str.ID);
+       		System.out.println(str.IDBook);
+       		System.out.println(str.Description);
+    	}
+
     }
     
-    public static boolean compBook(String ID, String IDBook, String Description) {
+    public static void showAllBook() {
+    	
+    	System.out.println("showAllBook");
+    	
+    	for(BookDescription str: arraylist) {
+    		
+			System.out.println("Иду по циклу in showAllBook");
+       		System.out.println(str.ID);
+       		System.out.println(str.IDBook);
+       		System.out.println(str.Description);
+    	}
+    	
+    	
+    }
+    
+    public static boolean compBook(String IDBook) {
     	
     	boolean res = true;
     	
@@ -17,10 +43,6 @@ public class AllBookDescription {
 			System.out.println("Иду по циклу");
 			
     		if(IDBook.equals(str.IDBook)) {
-    			System.out.println(str);
-        		System.out.println(str.IDBook);
-        		System.out.println("равно");
-        		System.out.println(IDBook);
             	return false;
     		}
     		else res = true;
@@ -28,6 +50,8 @@ public class AllBookDescription {
     	return res;
     }
 	   
-	
+	public static ArrayList<BookDescription> getAllBookDescription() {
+		return arraylist;
+	}
 
 }
