@@ -132,18 +132,18 @@ public class ListDemo extends DemoModule {
                     	listAllBook.add(0, file.getName());
                     	
                     	// Отрыть выбранную базу для чтения полного названия
-                        /* разобраться!
-                    	DBase discretionaryBook = new DBase("db//" + file.getName(), "Произвольная книга");
+                        DBase discretionaryBook = new DBase("db//" + file.getName(), "Произвольная книга");
                         try {
                         	discretionaryBook.ConnDBase();
-                        	//descriptionBook = discretionaryBook.ReadDescription();  
+                        	descriptionBook = discretionaryBook.ReadDescription(); 
+                        	System.out.println("Название книги: " + descriptionBook);
                         	discretionaryBook.CloseDB();
                 		} catch (ClassNotFoundException e) {
                 			e.printStackTrace();
                 		} catch (SQLException e) {
                 			e.printStackTrace();
                 		}
-                    	*/
+                    	
                     	
                     	
                     	

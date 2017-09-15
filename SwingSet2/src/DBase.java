@@ -54,19 +54,19 @@ public class DBase {
 
 	public String ReadDescription() throws ClassNotFoundException, SQLException {
 		statmt = conn.createStatement();
-		resSet = statmt.executeQuery("SELECT description FROM INFO;");
+		resSet = statmt.executeQuery("SELECT name, value FROM INFO;");
 
-		String result = "<body> <H1>" + description + "</H1>";
+		//String result = "<body> <H1>" + description + "</H1>";
 
 		while (resSet.next()) {
+			
+			if(resSet.getString("name").equals("description")) {
+				return  resSet.getString("value");
+			}
 
-			String description = resSet.getString("description");
-			result = result + "<P>" + description + "</P>";
-
-			System.out.println("название: " + result);
 		}
 
-		return result;
+		return "";
     }
 	
 	
