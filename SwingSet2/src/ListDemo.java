@@ -132,7 +132,7 @@ public class ListDemo extends DemoModule {
                     	listAllBook.add(0, file.getName());
                     	
                     	// ќтрыть выбранную базу дл€ чтени€ полного названи€
-                        /*
+                        /* разобратьс€!
                     	DBase discretionaryBook = new DBase("db//" + file.getName(), "ѕроизвольна€ книга");
                         try {
                         	discretionaryBook.ConnDBase();
