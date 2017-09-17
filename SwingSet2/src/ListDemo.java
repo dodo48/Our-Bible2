@@ -128,6 +128,7 @@ public class ListDemo extends DemoModule {
                     
                     // Проверка на совпадение
                     if(AllBookDescription.compBook(file.getName())) {
+                    	
                     	AllBookDescription.addBook("1", file.getName(), "");
                     	listAllBook.add(0, file.getName());
                     	
@@ -137,6 +138,11 @@ public class ListDemo extends DemoModule {
                         	discretionaryBook.ConnDBase();
                         	descriptionBook = discretionaryBook.ReadDescription(); 
                         	System.out.println("Название книги: " + descriptionBook);
+                        	
+                        	AllBookDescription.addBook("1", file.getName(), descriptionBook);
+                        	listAllBook.add(0, descriptionBook);
+
+                        	
                         	discretionaryBook.CloseDB();
                 		} catch (ClassNotFoundException e) {
                 			e.printStackTrace();
@@ -144,22 +150,22 @@ public class ListDemo extends DemoModule {
                 			e.printStackTrace();
                 		}
                     	
-                    	
+                        
                     	
                     	
                         // Общий список книг
-                    	/*
+                    	
                         DBase FullBooksList = new DBase("db//FullBooksList.SQLite3", "Общий список книг");
                         try {
                         	FullBooksList.ConnDBase();
-                        	// FullBooksList.SaveInfo(file.getName(), discretionaryBook);  
+                        	FullBooksList.SaveInfo(file.getName(), descriptionBook);  
                         	FullBooksList.CloseDB();
                 		} catch (ClassNotFoundException e) {
                 			e.printStackTrace();
                 		} catch (SQLException e) {
                 			e.printStackTrace();
                 		}
-                    	*/
+                    	
 
                     }
                     else {

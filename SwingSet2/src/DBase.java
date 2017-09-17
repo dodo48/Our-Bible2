@@ -11,8 +11,8 @@ public class DBase {
 	public String description;
 	
 	public Connection conn;
-	public Statement statmt;
-	public ResultSet resSet;
+	//public Statement statmt;  
+	//public ResultSet resSet;
 
 
 	// Конструктор объекта
@@ -32,8 +32,8 @@ public class DBase {
 	
 	// -------- Вывод таблицы--------
 	public String ReadDB() throws ClassNotFoundException, SQLException {
-		statmt = conn.createStatement();
-		resSet = statmt.executeQuery("SELECT * FROM BOOKS;");
+		Statement statmt = conn.createStatement();
+		ResultSet resSet = statmt.executeQuery("SELECT * FROM BOOKS;");
 
 		String result = "<body> <H1>" + description + "</H1>";
 
@@ -53,8 +53,8 @@ public class DBase {
 
 
 	public String ReadDescription() throws ClassNotFoundException, SQLException {
-		statmt = conn.createStatement();
-		resSet = statmt.executeQuery("SELECT name, value FROM INFO;");
+		Statement statmt = conn.createStatement();
+		ResultSet resSet = statmt.executeQuery("SELECT name, value FROM INFO;");
 
 		//String result = "<body> <H1>" + description + "</H1>";
 
@@ -74,13 +74,12 @@ public class DBase {
 	// -------- Вывод таблицы--------
 	public void SaveInfo(String IDBook, String Description) throws ClassNotFoundException, SQLException {
 		
-		String insertBook = "INSERT INTO BookDescription VALUES (?, ?)";
+		String insertBook = "INSERT INTO BookDescription (IDBook, Description) VALUES (\""+IDBook+"\",\""+Description+ "\")";
 		PreparedStatement preparedStatement = null;
-		preparedStatement.setInt(1, 1);
-		preparedStatement.setString(2, IDBook);
-		preparedStatement.setString(3, Description);
-
+		
+		System.out.println(insertBook);
 		preparedStatement = conn.prepareStatement(insertBook);
+		
 		preparedStatement.execute();
 
     }
@@ -92,14 +91,16 @@ public class DBase {
 	// -------- Вывод таблицы FullBooksList --------
 	public void ReadFullBooksList() throws ClassNotFoundException, SQLException {
 
+		Statement statmt;
 		try {
 			statmt = conn.createStatement();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return;
 		}
 		
-		resSet = statmt.executeQuery("SELECT * FROM BookDescription;");
+		ResultSet resSet = statmt.executeQuery("SELECT * FROM BookDescription;");
 
 		BookDescription bd = new BookDescription();
 
@@ -125,8 +126,8 @@ public class DBase {
 	
 	// получить текст главы
 	public String GetChapterText(int bookNumber, int chapter) throws ClassNotFoundException, SQLException {
-		statmt = conn.createStatement();
-		resSet = statmt.executeQuery("SELECT * FROM VERSES WHERE book_number = " + bookNumber + " AND chapter = " + chapter + ";");
+		Statement statmt = conn.createStatement();
+		ResultSet resSet = statmt.executeQuery("SELECT * FROM VERSES WHERE book_number = " + bookNumber + " AND chapter = " + chapter + ";");
 
 		String result = "<body><H1>Глава " + chapter + "</H1>"
 		+ "<br><a href=\"http://тыц2\">ссылка без переадресации</a></br>"
@@ -152,8 +153,8 @@ public class DBase {
 	
 	// --------Закрытие--------
 	public void CloseDB() throws ClassNotFoundException, SQLException {
-		statmt.close();
-		resSet.close();
+		//statmt.close();
+		//resSet.close();
 		conn.close();
 
 		System.out.println("Соединения закрыты");
