@@ -108,6 +108,7 @@ public class ListDemo extends DemoModule {
        
    		JList listAllBookDescription = new JList(listAllBook);
    		getDemoPanel().add(listAllBookDescription, BorderLayout.SOUTH);
+   		// listAllBookDescription.
    		
    		addBook.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
