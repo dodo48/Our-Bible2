@@ -13,6 +13,9 @@ public class DBase {
 	public Connection conn;
 	//public Statement statmt;  
 	//public ResultSet resSet;
+	
+	// Временно. На самом деле это выходной параметр метода.
+	public int caretPosition;
 
 
 	// Конструктор объекта
@@ -125,30 +128,201 @@ public class DBase {
 	
 	
 	// получить текст главы
-	public String GetChapterText(int bookNumber, int chapter) throws ClassNotFoundException, SQLException {
+	public String GetChapterText(int bookNumber, int currChapter, int currVerse) throws ClassNotFoundException, SQLException {
 		Statement statmt = conn.createStatement();
-		ResultSet resSet = statmt.executeQuery("SELECT * FROM VERSES WHERE book_number = " + bookNumber + " AND chapter = " + chapter + ";");
+		
+		// Определение имени книги+
+		// NB проанализировать наличие books и books_all в разных базах.
+		String bookName = "";
+		ResultSet resSet = statmt.executeQuery("SELECT * FROM BOOKS WHERE book_number = " + bookNumber + ";");
+		if (resSet.next()) {
+			bookName = resSet.getString("long_name");			
+		}
+		//-
+		
+		// Выборка хронологии.
+		DBase chronoDBase = new DBase("db//Гёце-д.subheadings.SQLite3", "Хронология Геце");
+		chronoDBase.ConnDBase();
+		ResultSet chronoResSet = chronoDBase.GetSubheadings(bookNumber);
+		
+		// Выборка заголовков.
+		DBase subheadingsDBase = new DBase("db//Гёце-п.subheadings.SQLite3", "Подзаголовоки Геце");
+		subheadingsDBase.ConnDBase();
+		ResultSet subheadingsResSet = subheadingsDBase.GetSubheadings(bookNumber);
+		
+		// Выборка ссылок.
+		DBase crossrefsDBase = new DBase("db//RST-x.crossreferences.SQLite3", "Подзаголовоки Геце");
+		crossrefsDBase.ConnDBase();
+		ResultSet crossrefsResSet = crossrefsDBase.GetCrossRefs(bookNumber);
+		
+		resSet = statmt.executeQuery("SELECT * FROM VERSES WHERE book_number = " + bookNumber + ";");
 
-		String result = "<body><H1>Глава " + chapter + "</H1>"
-		+ "<br><a href=\"http://тыц2\">ссылка без переадресации</a></br>"
-		+ "<br><a href=\"http://тыц\">ссылка с переадресацией</a></br>";
-
+		String result = ""; 
+				
+		
+		// Оформление HTML
+		/* Стили:
+		H1 - Книга
+		H2 - Глава
+		H3 Хронология и подзаголовок Гёце
+		Номер стиха - серый
+		Ссылки
+		Комментарии
+		Заметки
+		Слова Христа
+		Основной текст 
+		*/	
+		
+		String colorBrown = "#A52A2A";
+		String colorDarkTurquoise = "#00CED1";
+		String colorSkyBlue = "#87CEEB";
+		String colorDarkGray = "#A9A9A9";
+		String colorGray = "#808080";
+		
+		// Задаем стили
+		// http://htmlbook.ru/samcss/sposoby-dobavleniya-stiley-na-stranitsu
+		result +=
+			"<head>" + "\n" +
+			"<style type=\"text/css\">" + "\n" +
+		// Имя книги
+			"  H1 {" + "\n" +
+			"	color: " + colorBrown + ";" + "\n" +
+			"}" + "\n" +
+		// Глава
+			"  H2 {" + "\n" +
+			"	color: " + colorSkyBlue + ";" + "\n" +
+			"}" + "\n" +
+		// Подзаголовки Геце
+			"  H3 {" + "\n" +
+			"	color: " + colorBrown + ";" + "\n" +
+			"}" + "\n" +
+					
+		// Номер стиха:
+			"  .verse {" + "\n" +
+			"	color: " + colorGray + ";" + "\n" +
+			"}" + "\n" +
+			"</style>" + "\n" +
+			"</head>" + "\n" +
+			
+			
+			"<body>" + "\n" +
+			"<H1>" + bookName + "</H1>" + "\n";
+			
+			
 		while (resSet.next()) {
 			// int id = resSet.getInt("id");
 
+			// Скрываю номера Стронга из RST+
+			// Только вместо тэга !-- (комментарий) лучше использовать скрывающий тэг, мне попадался, только я забыл какой))
 			String text = resSet.getString("text");
 			text = text.replaceAll("<S>", "<!-- <S>");
 			text = text.replaceAll("</S>", "</S> -->");
-			result = result + "<br>" + resSet.getString("verse") + " " + text + "</br>";
+			
+			int chapterNumber = resSet.getInt("chapter");			
+			int verseNumber = resSet.getInt("verse");
+			
+			if (verseNumber == 1) {
+				result += "<H2>Глава " + chapterNumber + "</H2>" + "\n";
+			}
+			
+			// Простановка подзаголовков, если есть.
+			if (FindInResultSet(chronoResSet, chapterNumber, verseNumber)) {
+				// Добавляем подзаголовок с хронологией.
+				result += "<H3>" + chronoResSet.getString("subheading") + "</H3>" + "\n";
+			}
+			
+			if (FindInResultSet(subheadingsResSet, chapterNumber, verseNumber)) {
+				// Добавляем подзаголовок.
+				result += "<H3>" + subheadingsResSet.getString("subheading") + "</H3>" + "\n";
+			}
 
-			//System.out.println("Короткое название: " + short_name);
+			if (chapterNumber == currChapter && verseNumber == currVerse) {
+				caretPosition = result.length();
+				System.out.println(caretPosition);
+			}					
+				
+			result += "<br><span class = \"verse\">" + verseNumber + "</span> " + text + "</br>";
+
+			// Простановка ссылок. Их может быть несколько.
+			while (FindInResultSet(crossrefsResSet, chapterNumber, verseNumber)) {
+				result +=
+						"<br><a href=\"http://crossref"
+						+ crossrefsResSet.getInt("book_to") + "/" // здесь нужно краткое имя книги 
+						+ crossrefsResSet.getInt("chapter_to") + "/"
+						+ crossrefsResSet.getInt("verse_to_start")
+						+ "\">" 
+												
+						+ crossrefsResSet.getInt("book_to") + ":" // здесь нужно краткое имя книги 
+						+ crossrefsResSet.getInt("chapter_to") + ":"
+						+ crossrefsResSet.getInt("verse_to_start")
+						+ "</a></br>";
+
+				crossrefsResSet.next();
+			}
+			
 		}
 		result = result + "</body>";
 
 		System.out.println("Таблица выведена");
 
 		return result;
-
+	}
+	
+	// Используется для поиска в результате запроса с упорядочиванием.
+	// Смещает выборку на запись с искомыми номером главы и стиха (chapter+verse).
+	// Если ожидается, что в выборке несколько подходящих записей, то функцию нужно вызывать повторно, в цикле, при этом самостоятельно смещая выборку методом Next()!
+	public boolean FindInResultSet(ResultSet resSet, int chapterNumber, int verseNumber) throws ClassNotFoundException, SQLException {
+	
+		if (resSet.isAfterLast()) {
+			return false;
+		}
+		
+		do {
+			if (resSet.isBeforeFirst()) {
+				if (resSet.next() == false) {
+					return false;
+				};
+			}
+			
+			int currChapter = resSet.getInt("chapter");
+			int currVerse = resSet.getInt("verse");
+			
+			if (currChapter > chapterNumber || currChapter == chapterNumber && currVerse > verseNumber) {					
+				break;
+			}
+			
+			if (currChapter == chapterNumber && currVerse == verseNumber) {
+				return true;
+			}
+		} while (resSet.next());
+		
+		return false;
+	}
+	
+	
+	// Есть смысл разделить классы DBase в зависимости от типа базы (библия, подзаголовки, хронология, ссылки, комментарии, словарь).
+	//
+	// Для базы подзаголовков или хронологии. 
+	// Возвращает выборку из таблицы subheadings.
+	public ResultSet GetSubheadings(int bookNumber) throws ClassNotFoundException, SQLException {
+		Statement statmt = conn.createStatement();
+		ResultSet resSet = statmt.executeQuery(
+			"SELECT * " + "\n" +
+			"FROM subheadings " + "\n" +
+			"WHERE book_number = " + bookNumber +"\n" + 
+			"ORDER BY book_number, chapter, verse;");
+		return resSet;
+	}
+	
+	// Возвращает выборку ссылок из cross_references
+	public ResultSet GetCrossRefs(int bookNumber) throws ClassNotFoundException, SQLException {
+		Statement statmt = conn.createStatement();
+		ResultSet resSet = statmt.executeQuery(
+			"SELECT * " + "\n" +
+			"FROM cross_references " + "\n" +
+			"WHERE book = " + bookNumber +"\n" + 
+			"ORDER BY book, chapter, verse;");
+		return resSet;
 	}
 	
 	// --------Закрытие--------

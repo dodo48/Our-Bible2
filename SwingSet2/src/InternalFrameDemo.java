@@ -195,6 +195,11 @@ public class InternalFrameDemo extends DemoModule {
     public JInternalFrame createMyInternalFrame(Icon icon, Integer layer, int width, int height) {
         JInternalFrame jif = new JInternalFrame();
         
+        // Командная панель+
+        JToolBar jifToolBar = new JToolBar();
+        jif.add(jifToolBar, BorderLayout.NORTH);        
+        // Командная панель-         
+        
 		JEditorPane editorPane = new JEditorPane();
 		getContentPane().add(editorPane, BorderLayout.CENTER);
         editorPane.setContentType("text/html");
@@ -213,7 +218,7 @@ public class InternalFrameDemo extends DemoModule {
         DBase base = new DBase("db//RST+.SQLite3", "Синодальная");
         try {
     		base.ConnDBase();
-    		MyHTML = base.GetChapterText(20, 3);
+    		MyHTML = base.GetChapterText(10, 1, 1);
     		base.CloseDB();            	
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -233,15 +238,49 @@ public class InternalFrameDemo extends DemoModule {
         vp.add(editorPane); 
         jif.add(scroller, BorderLayout.CENTER);
 		
-        // Обработчика клика на ссылку.
+        // Обработчик клика на ссылку.
         editorPane.addHyperlinkListener(new HyperlinkListener() {
         	public void hyperlinkUpdate(HyperlinkEvent e) {
         		if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        			String url = e.getURL().toString();
+        			
+        			// Переход по ссылке.
+        			if (url.indexOf("crossref") != -1) {
+        				url = url.substring(15);
+        				int slashPos = url.indexOf("/"); 
+        				if (slashPos != -1) {
+        					int bookNumber = Integer.parseInt(url.substring(0, slashPos));
+        					
+        					int slashPos2 = url.indexOf("/", slashPos + 1);
+        					if (slashPos2 != -1) {
+        						System.out.println(url.substring(slashPos + 1, slashPos2 - 1));
+        						int chapterNumber = Integer.parseInt(url.substring(slashPos + 1, slashPos2));
+        						int verseNumber = Integer.parseInt(url.substring(slashPos2 + 1));
+
+        						try {
+        				    		base.ConnDBase();
+        				    		editorPane.setText(base.GetChapterText(bookNumber, chapterNumber, verseNumber));
+        				    		base.CloseDB();
+        				    		editorPane.setCaretPosition(base.caretPosition); //Тест
+        				    		System.out.println(base.caretPosition);
+        						} catch (ClassNotFoundException e2) {
+        							e2.printStackTrace();
+        						} catch (SQLException e2) {
+        							e2.printStackTrace();
+        						}
+        						System.out.println("" + bookNumber + " - " + chapterNumber + " - " + verseNumber);
+        					}
+        				}
+        				
+        			}
+        			
+        			/*
 	        		if (e.getURL().toString().equals("http://тыц")) {
 	        			// Можно получить текст другой книги или остаться в этой книге и спозиционироваться на конкретном стихе.
 	        			//editorPane.setText("Типа переадресация");
 	        			editorPane.setCaretPosition(2300);
 	        		}
+	        		*/
         		}
         	}
         });
