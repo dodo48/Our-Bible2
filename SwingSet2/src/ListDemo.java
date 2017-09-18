@@ -86,8 +86,6 @@ public class ListDemo extends DemoModule {
               
        listAllBook = new DefaultListModel();
        
-       listAllBook.add(0, "Первый элемент");
-       
        /*
        final JCheckBox cb = (JCheckBox) listAllBook.add(0, new JCheckBox(listAllBook));
        checkboxes.addElement(cb);
@@ -103,8 +101,8 @@ public class ListDemo extends DemoModule {
 	
        for(BookDescription str: allBook) {
   		
-   			listAllBook.add(0, str.IDBook);
-   		}
+   			listAllBook.add(0, str.Description + "  <" + str.IDBook + ">");
+       }
        
    		JList listAllBookDescription = new JList(listAllBook);
    		getDemoPanel().add(listAllBookDescription, BorderLayout.SOUTH);
@@ -133,18 +131,20 @@ public class ListDemo extends DemoModule {
                     // Проверка на совпадение
                     if(AllBookDescription.compBook(file.getName())) {
                     	
-                    	AllBookDescription.addBook("1", file.getName(), "");
-                    	listAllBook.add(0, file.getName());
+                    	//listAllBook.add(0, file.getName());
                     	
                     	// Отрыть выбранную базу для чтения полного названия
                         DBase discretionaryBook = new DBase("db//" + file.getName(), "Произвольная книга");
                         try {
                         	discretionaryBook.ConnDBase();
                         	descriptionBook = discretionaryBook.ReadDescription(); 
+                        	//AllBookDescription.addBook("1", file.getName(), descriptionBook);
+
                         	System.out.println("Название книги: " + descriptionBook);
                         	
                         	AllBookDescription.addBook("1", file.getName(), descriptionBook);
-                        	listAllBook.add(0, descriptionBook);
+                        	listAllBook.add(0, descriptionBook  + "  <" + file.getName() + ">");
+                   			// listAllBook.add(0, str.Description + "  <" + str.IDBook + ">");
 
                         	
                         	discretionaryBook.CloseDB();
@@ -181,6 +181,69 @@ public class ListDemo extends DemoModule {
 				
 			}
         });        
-        
+   		
+   		
+   		delBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                delBook(evt);
+            }
+
+			private void delBook(ActionEvent evt) {
+
+                int res = JOptionPane.showConfirmDialog(null, "Удалить книгу из программы?", "Вопрос", JOptionPane.YES_NO_OPTION);
+				if (res == JOptionPane.YES_OPTION) {
+					System.out.println("Delete");
+					
+					// Определить IDBook
+
+					int index = listAllBookDescription.getSelectedIndex();
+					String IDBook = listAllBookDescription.getSelectedValue().toString();
+					listAllBook.removeElementAt(index);
+					int firstInd = IDBook.indexOf('<');
+					int lastInd = IDBook.lastIndexOf('>');
+					
+					IDBook = IDBook.substring(firstInd+1, lastInd).trim();
+					
+					System.out.println(IDBook);
+					
+					if(AllBookDescription.delBook(IDBook)) {
+						System.out.println("Удален!");
+					}
+					System.out.println("________________________");
+					AllBookDescription.showAllBook();
+					System.out.println("________________________");
+						
+					
+                    DBase FullBooksList = new DBase("db//FullBooksList.SQLite3", "Общий список книг");
+                    try {
+                    	FullBooksList.ConnDBase();
+                    	FullBooksList.DelInfo(IDBook);  
+                    	FullBooksList.CloseDB();
+            		} catch (ClassNotFoundException e) {
+            			e.printStackTrace();
+            		} catch (SQLException e) {
+            			e.printStackTrace();
+            		}
+					
+					
+				}
+			}
+        });        
+  		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
+   		
 	}
 }

@@ -87,6 +87,18 @@ public class DBase {
 
     }
 	
+	// -------- Удаление элемента таблицы--------
+	public void DelInfo(String IDBook) throws ClassNotFoundException, SQLException {
+		
+		String deleteBook = "DELETE FROM BookDescription WHERE IDBook = (\""+IDBook+"\")";
+		PreparedStatement preparedStatement = null;
+		
+		System.out.println(deleteBook);
+		preparedStatement = conn.prepareStatement(deleteBook);
+		
+		preparedStatement.execute();
+
+    }
 	
 	
 	

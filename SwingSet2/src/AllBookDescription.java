@@ -54,4 +54,19 @@ public class AllBookDescription {
 		return arraylist;
 	}
 
+    public static boolean delBook(String IDBook) {
+    	
+    	boolean res = true;
+    	
+    	for(BookDescription str: arraylist) {
+    		
+    		if(str.IDBook.equals(IDBook)) {
+            	arraylist.remove(str);
+            	return true;
+    		}
+    		else res = true;
+    	}
+    	return res;
+    }
+	
 }
